@@ -1,0 +1,188 @@
+set nocompatible
+source $VIMRUNTIME/vimrc_example.vim
+source $VIMRUNTIME/mswin.vim
+behave mswin
+
+set diffexpr=MyDiff()
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let eq = ''
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      let cmd = '""' . $VIMRUNTIME . '\diff"'
+      let eq = '"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
+endfunction
+
+
+
+" configure for windows
+if has("win32")
+	" ignore sound when error happends
+	set noeb
+
+	" auto load the file when changed
+	set autoread
+
+	" show the status on the right corner
+	set ruler
+
+	" set auto indent
+	set autoindent
+
+	" set indent width
+	set tabstop=4
+	set shiftwidth=4 "space width
+
+	" ignore when searching
+	set ignorecase
+
+	" discard auto comment
+	autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+
+	" display row number
+	set number 
+
+    " set wrap line
+     "set nowrap
+
+	" syntax highlight 
+	syntax enable
+	syntax on
+	
+	" no backup
+	set nobackup
+	set noundofile
+	set noswapfile
+
+	" enable vundle
+	filetype off " required
+
+	set rtp+=$VIM/vimfiles/bundle/vundle
+
+	call vundle#begin('$VIM/vimfiles/bundle/')
+
+	Plugin 'VundleVim/Vundle.vim'
+
+	Plugin 'bling/vim-airline'
+
+	Plugin 'scrooloose/nerdtree'
+
+	Plugin 'mattn/emmet-vim'
+
+	call vundle#end() "required
+
+	filetype plugin indent on " required
+
+	" remove toolbar and menubar
+	if has("gui_running")
+		set guioptions-=m "remove menu bar
+		set guioptions-=T "remove toolbar
+		set guioptions-=r "remove right-hand scroll bar
+		set guioptions-=l "remove left-hand scroll bar
+		set guioptions-=L "remove left-hand scroll bar even if there is a vertiacal split
+		set guioptions-=b "remove bottom scroll bar
+
+		" outline the row
+		set cursorline
+
+        " outline the column
+        set cursorcolumn
+
+		" set colors scheme to my favorite
+        "colorscheme koehler
+		colorscheme molokai
+		set background=dark
+
+		" set gui font
+		"set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
+		set guifont=DejaVu_Sans_Mono_for_Powerline:h10:cANSI
+
+		" encoding utf-8
+		set encoding=utf-8
+		set fileencoding=utf-8
+		set fileencodings=ucs-bom,utf-8,chinese,cp936
+
+		" Chinese menu utf-8
+		source $VIMRUNTIME/delmenu.vim
+		source $VIMRUNTIME/menu.vim
+
+		" Chinese information utf-8
+		language messages zh_CN.utf-8
+
+		" airline configuration
+		set t_Co=256
+		set laststatus=2
+
+		" indent
+		set tabstop=4
+		set shiftwidth=4
+		set expandtab
+
+		let g:airline_powerline_fonts = 1
+
+		if !exists('g:airline_symbols')
+			let g:airline_symbols = {}
+			let g:airline_left_sep = ''
+			let g:airline_left_alt_sep = ''
+			let g:airline_right_sep = ''
+			let g:airline_right_alt_sep = ''
+			let g:airline_symbols.branch = ''
+			let g:airline_symbols.readonly = ''
+			let g:airline_symbols.linenr = ''
+			let g:airline_detect_modified=1
+			let g:airline_detect_paste=1
+		endif
+		let g:airline#extensions#whitespace#enabled=0  
+
+
+		let g:airline#extensions#tabline#enabled = 1
+		let g:airline#extensions#tabline#left_sep = ' '
+		let g:airline#extensions#tabline#left_alt_sep = '|'
+		let g:airline#extensions#tabline#buffer_nr_show = 1
+
+		" emmet configuration
+		let g:user_emmet_leader_key='<Tab>'
+
+		let g:user_emmet_install_global=0
+
+		autocmd FileType html,css EmmetInstall
+
+		" for buffer
+		"nnoremap [b :bp<CR>
+		"nnoremap ]b :bn<CR>
+		"map <leader>1 :b 1<CR>
+		"map <leader>2 :b 2<CR>
+		"map <leader>3 :b 3<CR>
+		"map <leader>4 :b 4<CR>
+		"map <leader>5 :b 5<CR>
+		"map <leader>6 :b 6<CR>
+		"map <leader>7 :b 7<CR>
+		"map <leader>8 :b 8<CR>
+		"map <leader>9 :b 9<CR>
+
+		" open with maximum
+		"au GUIEnter * simalt ~x 
+
+		" open NerdTree with short cut
+		map <F2> :NERDTreeToggle<CR>
+
+        map <F3> :source $VIMRUNTIME/syntax/2html.vim
+		map <F4> :cd C:\Users\snake\workbench<CR>
+	endif
+endif
+
