@@ -53,8 +53,9 @@ void printResult(int n, int (*fun)(int n)) {
 }
 
 int main(void) {
-    printResult(9, fib1);
-    printResult(9, fib2);
-    printResult(9, fib3);
+    //printResult(9, fib1);
+    //printResult(9, fib2);
+    int i = 100000;
+    printResult(i, fib3);
     return 0;
 }
