@@ -104,6 +104,9 @@ func! CompileC()
     exec "w"
     let compilecmd="!gcc "
     let compileflag="-o %< "
+    if search("ub\.h") != 0
+        let compile cmd = " -luv"
+    endif
     if search("mpi\.h") != 0
         let compilecmd = "!mpicc "
     endif
@@ -183,6 +186,11 @@ func! RunPython()
     exec "!python %"
 endfunc
 
+" Run javascript code
+func! RunJavascript()
+    exec "!node %"
+endfunc
+
 " Run source code common interface
 func! RunCode()
     exec "w"
@@ -194,6 +202,8 @@ func! RunCode()
         exec "call RunPython()"
     elseif &filetype == "java"
         exec "call RunJava()"
+    elseif &filetype == "javascript"
+        exec "call RunJavascript()"
     endif
 endfunc
 
@@ -201,15 +211,17 @@ endfunc
 func! TestCode()
     exec "w"
     if &filetype == "c"
-        exec "!gcc -Wall % -o %< && ./%<"
+        exec "!gcc -Wall -lpthread % -o %< && ./%<"
     elseif &filetype == "cpp"
         exec "!g++ -Wall -std=c++11 -lpthread % -o %< && ./%<"
     elseif &filetype == "python"
-        exec "!python %"
+        exec "!python3 %"
     elseif &filetype == "java"
         exec "!javac % && java %<"
     elseif &filetype == "javascript"
         exec "!node %"
+    elseif &filetype == "sh"
+        exec "!bash %"
     endif
 endfunc
 
