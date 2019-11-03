@@ -1,7 +1,7 @@
-set nocompatible
+" Configuration for Windows Vim
+"
+"
 source $VIMRUNTIME/vimrc_example.vim
-source $VIMRUNTIME/mswin.vim
-behave mswin
 
 set diffexpr=MyDiff()
 function MyDiff()
@@ -10,179 +10,142 @@ function MyDiff()
   if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
   let arg1 = v:fname_in
   if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg1 = substitute(arg1, '!', '\!', 'g')
   let arg2 = v:fname_new
   if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg2 = substitute(arg2, '!', '\!', 'g')
   let arg3 = v:fname_out
   if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
-  let eq = ''
+  let arg3 = substitute(arg3, '!', '\!', 'g')
   if $VIMRUNTIME =~ ' '
     if &sh =~ '\<cmd'
-      let cmd = '""' . $VIMRUNTIME . '\diff"'
-      let eq = '"'
+      if empty(&shellxquote)
+        let l:shxq_sav = ''
+        set shellxquote&
+      endif
+      let cmd = '"' . $VIMRUNTIME . '\diff"'
     else
       let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
     endif
   else
     let cmd = $VIMRUNTIME . '\diff'
   endif
-  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
+  let cmd = substitute(cmd, '!', '\!', 'g')
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  if exists('l:shxq_sav')
+    let &shellxquote=l:shxq_sav
+  endif
 endfunction
 
+" Backup
+set nocompatible
+set nobackup
+set noswapfile
+set noundofile
+set history=512
 
+" Lang & Encoding
+set nobomb
+set fileencodings=utf-8,gbk2312,gb18030,cp936
+set encoding=utf-8
+set langmenu=zh_CN
+let $LANG='en_US.UTF-8'
 
-" configure for windows
-if has("win32")
-	" ignore sound when error happends
-	set noeb
+" Coding
+set noeb
+set autoread
+set autochdir
+set cursorline
+set hlsearch
+set number
 
-	" auto load the file when changed
-	set autoread
+" Intent
+set autoindent
+set cindent
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
 
-	" show the status on the right corner
-	set ruler
+" Clipboard
+set clipboard+=unnamed
 
-	" set auto indent
-	set autoindent
+" GUI Style
+if has("gui_running")
+	" change colorscheme
+	" colorscheme desert
+    colorscheme molokai
 
-	" set indent width
-	set tabstop=4
-	set shiftwidth=4 "space width
+	" set window size
+	" set lines=35 columns=140
+    autocmd GUIEnter * simalt ~x
 
-	" ignore when searching
-	set ignorecase
+    " syntax highlight
+    syntax enable
+    syntax on
 
-	" discard auto comment
-	autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+	" set font
+	set guifont=Bitstream_Vera_Sans_Mono:h12:cANSI
 
-	" display row number
-	set number 
+    if has("win32")
+        set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 
-    " set wrap line
-     "set nowrap
+        " ensure encode normal
+        source $VIMRUNTIME/delmenu.vim
+        source $VIMRUNTIME/menu.vim
+        language messages zh_CN.utf-8
 
-	" syntax highlight 
-	syntax enable
-	syntax on
-	
-	" no backup
-	set nobackup
-	set noundofile
-	set noswapfile
+        " disbale menu/tools bar
+        set winaltkeys=no
+        set guioptions-=T
+        set guioptions-=m
+        set guioptions-=L
+        set guioptions-=r
+        set guioptions-=b
 
-	" enable vundle
-	filetype off " required
-
-	set rtp+=$VIM/vimfiles/bundle/vundle
-
-	call vundle#begin('$VIM/vimfiles/bundle/')
-
-	Plugin 'VundleVim/Vundle.vim'
-
-	Plugin 'bling/vim-airline'
-
-	Plugin 'scrooloose/nerdtree'
-
-	Plugin 'mattn/emmet-vim'
-
-	call vundle#end() "required
-
-	filetype plugin indent on " required
-
-	" remove toolbar and menubar
-	if has("gui_running")
-		set guioptions-=m "remove menu bar
-		set guioptions-=T "remove toolbar
-		set guioptions-=r "remove right-hand scroll bar
-		set guioptions-=l "remove left-hand scroll bar
-		set guioptions-=L "remove left-hand scroll bar even if there is a vertiacal split
-		set guioptions-=b "remove bottom scroll bar
-
-		" outline the row
-		set cursorline
-
-        " outline the column
-        set cursorcolumn
-
-		" set colors scheme to my favorite
-        "colorscheme koehler
-		colorscheme molokai
-		set background=dark
-
-		" set gui font
-		"set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
-		set guifont=DejaVu_Sans_Mono_for_Powerline:h10:cANSI
-
-		" encoding utf-8
-		set encoding=utf-8
-		set fileencoding=utf-8
-		set fileencodings=ucs-bom,utf-8,chinese,cp936
-
-		" Chinese menu utf-8
-		source $VIMRUNTIME/delmenu.vim
-		source $VIMRUNTIME/menu.vim
-
-		" Chinese information utf-8
-		language messages zh_CN.utf-8
-
-		" airline configuration
-		set t_Co=256
-		set laststatus=2
-
-		" indent
-		set tabstop=4
-		set shiftwidth=4
-		set expandtab
-
-		let g:airline_powerline_fonts = 1
-
-		if !exists('g:airline_symbols')
-			let g:airline_symbols = {}
-			let g:airline_left_sep = ''
-			let g:airline_left_alt_sep = ''
-			let g:airline_right_sep = ''
-			let g:airline_right_alt_sep = ''
-			let g:airline_symbols.branch = ''
-			let g:airline_symbols.readonly = ''
-			let g:airline_symbols.linenr = ''
-			let g:airline_detect_modified=1
-			let g:airline_detect_paste=1
-		endif
-		let g:airline#extensions#whitespace#enabled=0  
-
-
-		let g:airline#extensions#tabline#enabled = 1
-		let g:airline#extensions#tabline#left_sep = ' '
-		let g:airline#extensions#tabline#left_alt_sep = '|'
-		let g:airline#extensions#tabline#buffer_nr_show = 1
-
-		" emmet configuration
-		let g:user_emmet_leader_key='<Tab>'
-
-		let g:user_emmet_install_global=0
-
-		autocmd FileType html,css EmmetInstall
-
-		" for buffer
-		"nnoremap [b :bp<CR>
-		"nnoremap ]b :bn<CR>
-		"map <leader>1 :b 1<CR>
-		"map <leader>2 :b 2<CR>
-		"map <leader>3 :b 3<CR>
-		"map <leader>4 :b 4<CR>
-		"map <leader>5 :b 5<CR>
-		"map <leader>6 :b 6<CR>
-		"map <leader>7 :b 7<CR>
-		"map <leader>8 :b 8<CR>
-		"map <leader>9 :b 9<CR>
-
-		" open with maximum
-		"au GUIEnter * simalt ~x 
-
-		" open NerdTree with short cut
-		map <F2> :NERDTreeToggle<CR>
-
-        map <F3> :source $VIMRUNTIME/syntax/2html.vim
-		map <F4> :cd C:\Users\snake\workbench<CR>
-	endif
+        " add keymaps
+        map <F3> : call SetDefaultHeader()<CR>
+        map <F4> : call SaveCode()<CR>
+        map <F5> : call CompileAndRunCode()<CR>
+    endif
 endif
 
+" Save current document
+func! SaveCode()
+    exec "w"
+endfunction
+
+" Run current code in shell
+func! CompileAndRunCode()
+    exec "w"
+    if &filetype == "c"
+        exec "!gcc -Wall -lpthread % -o %< && %<"
+    elseif &filetype == "cpp"
+        exec "!g++ -Wall -std=c++11 -lpthread % -o %< && %<"
+    elseif &filetype == "python"
+        exec "!python %"
+    elseif &filetype == "java"
+        exec "!javac % && java %<"
+    elseif &filetype == "javascript"
+        exec "!node %"
+    elseif &filetype == "sh"
+        exec "!bash %"
+    endif
+endfunction
+
+" Set useful header for programming
+func! SetDefaultHeader()
+    if &filetype == 'cpp'
+        call append(0, '#include "bits/stdc++.h"')
+        call append(1, 'using namespace std;')
+        call append(2, '')
+        call append(3, 'int main(int argc, char **argv) {')
+        call append(4, '    return 0;')
+        call append(5, '}')
+    elseif &filetype == 'python'
+        call append(0, '#! /usr/bin/env python')
+        call append(1, '# -*- coding: utf-8 -*-')
+    endif
+
+    exec 'w'
+endfunction
