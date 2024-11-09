@@ -1,0 +1,155 @@
+" Configuration for Windows Vim
+"
+"
+source $VIMRUNTIME/vimrc_example.vim
+
+set diffexpr=MyDiff()
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg1 = substitute(arg1, '!', '\!', 'g')
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg2 = substitute(arg2, '!', '\!', 'g')
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let arg3 = substitute(arg3, '!', '\!', 'g')
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      if empty(&shellxquote)
+        let l:shxq_sav = ''
+        set shellxquote&
+      endif
+      let cmd = '"' . $VIMRUNTIME . '\diff"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  let cmd = substitute(cmd, '!', '\!', 'g')
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  if exists('l:shxq_sav')
+    let &shellxquote=l:shxq_sav
+  endif
+endfunction
+
+" Backup
+set nocompatible
+set nobackup
+set noswapfile
+set noundofile
+set history=512
+
+" Lang & Encoding
+set nobomb
+set fileencodings=utf-8,gbk2312,gb18030,cp936
+set encoding=utf-8
+set langmenu=zh_CN
+let $LANG='en_US.UTF-8'
+
+" Coding
+set noeb
+set autoread
+set autochdir
+set cursorline
+set hlsearch
+set number
+
+" Intent
+set autoindent
+set cindent
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+
+" Clipboard
+set clipboard+=unnamed
+
+" GUI Style
+if has("gui_running")
+	" change colorscheme
+	colorscheme desert
+
+    " custom colorscheme which need download
+    " colorscheme molokai
+
+	" set window size
+	" set lines=35 columns=140
+    autocmd GUIEnter * simalt ~x
+
+    " syntax highlight
+    syntax enable
+    syntax on
+
+	" set font
+    " custom guifont which need download
+	" set guifont=Bitstream_Vera_Sans_Mono:h12:cANSI
+    set guifont=Consolas:h12
+
+    if has("win32")
+        set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
+
+        " ensure encode normal
+        source $VIMRUNTIME/delmenu.vim
+        source $VIMRUNTIME/menu.vim
+        language messages zh_CN.utf-8
+
+        " disbale menu/tools bar
+        set winaltkeys=no
+        set guioptions-=T
+        set guioptions-=m
+        set guioptions-=L
+        set guioptions-=r
+        set guioptions-=b
+
+        " add keymaps
+        map <F3> : call SetDefaultHeader()<CR>
+        map <F4> : call SaveCode()<CR>
+        map <F5> : call CompileAndRunCode()<CR>
+    endif
+endif
+
+" Save current document
+func! SaveCode()
+    exec "w"
+endfunction
+
+" Run current code in shell
+func! CompileAndRunCode()
+    exec "w"
+    if &filetype == "c"
+        exec "!gcc -Wall -lpthread % -o %< && %<"
+    elseif &filetype == "cpp"
+        exec "!g++ -Wall -std=c++11 -lpthread % -o %< && %<"
+    elseif &filetype == "python"
+        exec "!python %"
+    elseif &filetype == "java"
+        exec "!javac % && java %<"
+    elseif &filetype == "javascript"
+        exec "!node %"
+    elseif &filetype == "sh"
+        exec "!bash %"
+    endif
+endfunction
+
+" Set useful header for programming
+func! SetDefaultHeader()
+    if &filetype == 'cpp'
+        call append(0, '#include "bits/stdc++.h"')
+        call append(1, 'using namespace std;')
+        call append(2, '')
+        call append(3, 'int main(int argc, char **argv) {')
+        call append(4, '    return 0;')
+        call append(5, '}')
+    elseif &filetype == 'python'
+        call append(0, '#! /usr/bin/env python')
+        call append(1, '# -*- coding: utf-8 -*-')
+    endif
+
+    exec 'w'
+endfunction
